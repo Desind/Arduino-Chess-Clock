@@ -32,8 +32,9 @@ const PROGMEM int blackLED = A0;
 const PROGMEM int whiteLED = A1;
 const PROGMEM int blackButton = A3;
 const PROGMEM int whiteButton = A2;
-const PROGMEM int optionButton = A4;
-const PROGMEM int buzzerPin = A5;
+const PROGMEM int buzzerPin = A4;
+const PROGMEM int menuButton = A6;
+const PROGMEM int backButton = A7;
 
 int digitDelay = 1;
 
@@ -141,7 +142,6 @@ void setup(){
 void loop(){
     blackButtonState = digitalRead(blackButton);
     whiteButtonState = digitalRead(whiteButton);
-    optionButtonState = digitalRead(optionButton);
     if (blackButtonState == HIGH && !blackPressed){
       digitalWrite(blackLED, HIGH);
       digitalWrite(whiteLED, LOW);

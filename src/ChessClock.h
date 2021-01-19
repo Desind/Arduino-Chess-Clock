@@ -8,6 +8,7 @@
 #define MODE_DELAY 2
 #define MODE_HOURGLASS 3
 #define MODE_BRONSTEIN 4
+#define MODE_TORUNAMENT 5
 
 #define PLAYER_LEFT -1
 #define PLAYER_RIGHT 1
@@ -16,21 +17,25 @@
 class ChessClock
 {
     private:
-        uint32_t leftPlayerTime;        //TIME LEFT FOR LEFT PLAYER
-        uint32_t rightPlayerTime;       //TIME LEFT FOR RIGHT PLAYER
-        uint16_t leftPlayerMoves;       //MOVE COUNT FOR LEFT PLAYER    
-        uint16_t rightPlayerMoves;      //MOVE COUNT FOR RIGHT PLAYER
-        byte currentPlayer;             //TURN OF WHICH PLAYER IS NOW
-        byte gameResult;                //RESULT OF THE GAME (GAME ENDED / GAME RUNNING)
-        byte clockMode;                 //CURRENT MODE OF THE CLOCK
-        uint16_t incrementValue;        //VALUE OF INCREMENT TIME
-        uint16_t delayValue;            //VALUE OF DELAY TIME
-        uint32_t bronsteinLeftStart;    //START OF LEFT PLAYER TURN - NEEDED TO CALCULATE TIME ADDED AFTER TURN
-        uint32_t bronsteinRightStart;   //START OF RIGHT PLAYER TURN - NEEDED TO CALCULATE TIME ADDED AFTER TURN
-        uint16_t bronsteinValue;        //VALUE OF BRONSTEIN INCREMENT TIME
-        boolean ledIndicatorEnabled;    //LED MOVE INDICATOR TOGGLE
-        boolean soundIndicatorEnabled;  //SOUND MOVE INDICATOR TOGGLE
-        boolean moveCounterEnabled;     //VALUE TO DETERMINE IF THERE IS NEED TO DRAW MOVE COUNTER
+        uint32_t leftPlayerTime;                    //TIME LEFT FOR LEFT PLAYER
+        uint32_t rightPlayerTime;                   //TIME LEFT FOR RIGHT PLAYER
+        uint16_t leftPlayerMoves;                   //MOVE COUNT FOR LEFT PLAYER    
+        uint16_t rightPlayerMoves;                  //MOVE COUNT FOR RIGHT PLAYER
+        byte currentPlayer;                         //TURN OF WHICH PLAYER IS NOW
+        byte gameResult;                            //RESULT OF THE GAME (GAME ENDED / GAME RUNNING)
+        byte clockMode;                             //CURRENT MODE OF THE CLOCK
+        uint16_t incrementValue;                    //VALUE OF INCREMENT TIME
+        uint16_t delayValue;                        //VALUE OF DELAY TIME
+        uint32_t bronsteinLeftStart;                //START OF LEFT PLAYER TURN - NEEDED TO CALCULATE TIME ADDED AFTER TURN
+        uint32_t bronsteinRightStart;               //START OF RIGHT PLAYER TURN - NEEDED TO CALCULATE TIME ADDED AFTER TURN
+        uint16_t bronsteinValue;                    //VALUE OF BRONSTEIN INCREMENT TIME
+        uint16_t tournamentMoveCap;                 //HOW MANY MOVES UNTIL ADDITIONAL TIME
+        uint16_t torunamentPreCapIncrement;         //INCREMENT BEFORE MOVE CAP
+        uint16_t tournamentAdditionalTimeAfterCap;  //ADDITIONAL TIME ADDED TO TIMER AFTER MOVE CAP 
+        uint16_t torunamentPostCapIncrement;        //INCREMENT AFTER MOVE CAP
+        boolean ledIndicatorEnabled;                //LED MOVE INDICATOR TOGGLE
+        boolean soundIndicatorEnabled;              //SOUND MOVE INDICATOR TOGGLE
+        boolean moveCounterEnabled;                 //VALUE TO DETERMINE IF THERE IS NEED TO DRAW MOVE COUNTER
 
     public:
 
@@ -40,12 +45,16 @@ class ChessClock
         void setIncrementValue(uint16_t value);
         void setDelayValue(uint16_t value);
         void setBronsteinValue(uint16_t value);
+        void setTournamentMoveCap(uint16_t value);
+        void setTournamentPreCapIncrement(uint16_t value);
+        void setTournamentAdditionalTimeAfterCap(uint16_t value);
+        void setTournamentPostCapIncrement(uint16_t value);
         void switchLedIndicator(boolean mode);
         void switchSoundIndicator(boolean mode);
         void switchMoveCounter(boolean mode);
 
         void timeUpdate(uint32_t time); //UPDATE CLOCK TIME (SUBTRACT TIME FROM CURRENT PLAYER)
-        void playerMove(byte player);   //SET CURRENT MOVE TO OPPONEN (ADD OVERDUE TIME FROM INCREMENT)
+        void playerMove(byte player);   //SET CURRENT MOVE TO OPPONENT (ADD OVERDUE TIME FROM INCREMENT)
 
         void loadPreset(byte preset);   //LOAD CHESS CLOCK PRESET FROM MEMORY
 
@@ -61,6 +70,10 @@ class ChessClock
         uint16_t getIncrementValue();
         uint16_t getDelayValue();
         uint16_t getBronsteinValue();
+        uint16_t getTournamentMoveCap();          
+        uint16_t getTorunamentPreCapIncrement();       
+        uint16_t getTournamentAdditionalTimeAfterCap(); 
+        uint16_t getTorunamentPostCapIncrement();
         boolean getLedIndicatorEnabled();
         boolean getSoundIndicatorEnabled();
         boolean getMoveCounterEnabled();
