@@ -2,29 +2,74 @@
 #include <ChessClock.h>
 
 #define DIGIT_EMPTY 20
+#define CHAR_S 21
+#define CHAR_E 22
+#define CHAR_t 23
+#define CHAR_H 24
+#define CHAR_N 25
+#define SCREEN_GAME 0
+#define SCREEN_MENU_MODE 1
+#define SCREEN_MENU_MODE_CHANGE 2
+#define SCREEN_MENU_TIME 3
+#define SCREEN_MENU_TIME_CHANGE 4
 
-const byte digit[21] = {
-    B11111101, //0
-    B01100001, //1
-    B11011011, //2
-    B11110011, //3
-    B01100111, //4
-    B10110111, //5
-    B10111111, //6
-    B11100101, //7
-    B11111111, //8
-    B11110111, //9
-    B11111100, //0.
-    B01100000, //1.
-    B11011010, //2.
-    B11110010, //3.
-    B01100110, //4.
-    B10110110, //5.
-    B10111110, //6.
-    B11100100, //7.
-    B11111110, //8.
-    B11110110, //9.
-    B00000001  //empty
+const byte digit[26] = {
+    B11111101, //0.
+    B01100001, //1.
+    B11011011, //2.
+    B11110011, //3.
+    B01100111, //4.
+    B10110111, //5.
+    B10111111, //6.
+    B11100101, //7.
+    B11111111, //8.
+    B11110111, //9.
+    B11111100, //0
+    B01100000, //1
+    B11011010, //2
+    B11110010, //3
+    B01100110, //4
+    B10110110, //5
+    B10111110, //6
+    B11100100, //7
+    B11111110, //8
+    B11110110, //9
+    B00000000, //empty
+    B10110110, //S
+    B10011110, //E 
+    B00011110, //t
+    B01101111, //H.
+    B11101100, //N
+};
+
+const byte setupAnim[28] = {
+    B00000000,
+    B00000000,
+    B00000000,
+    B00000000,
+    B00000000,
+    B00000000,
+    B00000000,
+    B00000000,
+    B10000000,
+    B10000010,
+    B10010010,
+    B10010010,
+    B10010010,
+    B10010010,
+    B00010010,
+    B00010000,
+    B00000000,
+    B00000000,
+    B00000000,
+    B00000000,
+    B00000000,
+    B00000000,
+    B00000000,
+    B00000000,
+    B00000000,
+    B00000000,
+    B00000000,
 };
 
 const PROGMEM int clock = 13;
@@ -62,6 +107,12 @@ bool menuPressed = false;
 bool isGameFinished = false;
 
 long lastMilis = 0;
+int8_t lastPlayer = PLAYER_NONE;
+bool gameStarted = false;
+uint16_t flickerTime = 1000;
+int currentTimeChangeSegment = 0;
+
+byte currentScreen = 0;
 
 uint32_t milisToHours(uint32_t time)
 {
@@ -85,6 +136,7 @@ void screenUpdateLeft(uint32_t time){
   int s = milisToSeconds(time);
   if(h==0 && m<30){
     C1 = m / 10;
+    if(C1 ==0) C1 = DIGIT_EMPTY;
     C2 = m % 10;
     C3 = s / 10;
     C4 = s % 10;
@@ -131,6 +183,7 @@ void screenUpdateRight(uint32_t time){
   if (h == 0 && m < 30)
   {
     C5 = m / 10;
+    if(C5 ==0) C5 = DIGIT_EMPTY;
     C6 = m % 10;
     C7 = s / 10;
     C8 = s % 10;
@@ -181,6 +234,72 @@ void updateLed(int currentPlayer){
     digitalWrite(rightLED, LOW);
   }
 }
+void screenUpdate(byte c1, byte c2, byte c3, byte c4, byte c5, byte c6, byte c7, byte c8){
+  //DITIT 1
+  shiftOut(data, clock, MSBFIRST, c1);
+  digitalWrite(latch, LOW);
+  digitalWrite(digit1, LOW);
+  delay(digitDelay);
+  digitalWrite(digit1, HIGH);
+  digitalWrite(latch, HIGH);
+  //DIGIT 2
+  shiftOut(data, clock, MSBFIRST, c2);
+  digitalWrite(latch, LOW);
+  digitalWrite(digit2, LOW);
+  delay(digitDelay);
+  digitalWrite(digit2, HIGH);
+  digitalWrite(latch, HIGH);
+  //DIGIT 3
+  shiftOut(data, clock, MSBFIRST, c3);
+  digitalWrite(latch, LOW);
+  digitalWrite(digit3, LOW);
+  delay(digitDelay);
+  digitalWrite(digit3, HIGH);
+  digitalWrite(latch, HIGH);
+  //DIGIT 4
+  shiftOut(data, clock, MSBFIRST, c4);
+  digitalWrite(latch, LOW);
+  digitalWrite(digit4, LOW);
+  delay(digitDelay);
+  digitalWrite(digit4, HIGH);
+  digitalWrite(latch, HIGH);
+  //DIGIT 5
+  shiftOut(data, clock, MSBFIRST, c5);
+  digitalWrite(latch, LOW);
+  digitalWrite(digit5, LOW);
+  delay(digitDelay);
+  digitalWrite(digit5, HIGH);
+  digitalWrite(latch, HIGH);
+  //DIGIT 6
+  shiftOut(data, clock, MSBFIRST, c6);
+  digitalWrite(latch, LOW);
+  digitalWrite(digit6, LOW);
+  delay(digitDelay);
+  digitalWrite(digit6, HIGH);
+  digitalWrite(latch, HIGH);
+  //DIGIT 7
+  shiftOut(data, clock, MSBFIRST, c7);
+  digitalWrite(latch, LOW);
+  digitalWrite(digit7, LOW);
+  delay(digitDelay);
+  digitalWrite(digit7, HIGH);
+  digitalWrite(latch, HIGH);
+  //DIGIT 8
+  shiftOut(data, clock, MSBFIRST, c8);
+  digitalWrite(latch, LOW);
+  digitalWrite(digit8, LOW);
+  delay(digitDelay);
+  digitalWrite(digit8, HIGH);
+  digitalWrite(latch, HIGH);
+}
+void setupAnimation(){
+  for(int counter=7; counter<28; counter++){
+    for (int i = 0; i < 6; i++)
+    {
+      screenUpdate(setupAnim[counter], setupAnim[counter-1], setupAnim[counter-2], setupAnim[counter-3], setupAnim[counter-4], setupAnim[counter-5], setupAnim[counter-6], setupAnim[counter-7]);
+    }
+  }
+}
 void gameEnded(){
   tone(buzzerPin, 330, 50);
   delay(100);
@@ -191,44 +310,45 @@ void gameEnded(){
 ChessClock chessClock;
 
 void setup(){
-    pinMode(latch, OUTPUT);
-    pinMode(clock, OUTPUT);
-    pinMode(data, OUTPUT);
-    pinMode(digit1, OUTPUT);
-    pinMode(digit2, OUTPUT);
-    pinMode(digit3, OUTPUT);
-    pinMode(digit4, OUTPUT);
-    pinMode(digit5, OUTPUT);
-    pinMode(digit6, OUTPUT);
-    pinMode(digit7, OUTPUT);
-    pinMode(digit8, OUTPUT);
-    pinMode(leftButton, INPUT);
-    pinMode(rightButton, INPUT);
-    pinMode(backButton, INPUT);
-    pinMode(menuButton, INPUT);
-    digitalWrite(digit1, HIGH);
-    digitalWrite(digit2, HIGH);
-    digitalWrite(digit3, HIGH);
-    digitalWrite(digit4, HIGH);
-    digitalWrite(digit5, HIGH);
-    digitalWrite(digit6, HIGH);
-    digitalWrite(digit7, HIGH);
-    digitalWrite(digit8, HIGH);
-    digitalWrite(resetPin, HIGH);
-    pinMode(resetPin, OUTPUT);
-    lastMilis = millis();
+  pinMode(latch, OUTPUT);
+  pinMode(clock, OUTPUT);
+  pinMode(data, OUTPUT);
+  pinMode(digit1, OUTPUT);
+  pinMode(digit2, OUTPUT);
+  pinMode(digit3, OUTPUT);
+  pinMode(digit4, OUTPUT);
+  pinMode(digit5, OUTPUT);
+  pinMode(digit6, OUTPUT);
+  pinMode(digit7, OUTPUT);
+  pinMode(digit8, OUTPUT);
+  pinMode(leftButton, INPUT);
+  pinMode(rightButton, INPUT);
+  pinMode(backButton, INPUT);
+  pinMode(menuButton, INPUT);
+  digitalWrite(digit1, HIGH);
+  digitalWrite(digit2, HIGH);
+  digitalWrite(digit3, HIGH);
+  digitalWrite(digit4, HIGH);
+  digitalWrite(digit5, HIGH);
+  digitalWrite(digit6, HIGH);
+  digitalWrite(digit7, HIGH);
+  digitalWrite(digit8, HIGH);
+  digitalWrite(resetPin, HIGH);
+  pinMode(resetPin, OUTPUT);
+  lastMilis = millis();
 
-    chessClock.setLeftPlayerTime(10000);
-    chessClock.setRightPlayerTime(10000);
-    chessClock.setClockMode(MODE_TOURNAMENT);
-    chessClock.ledIndicatorEnabled = true;
-    chessClock.setIncrementValue(5);
-    chessClock.setDelayValue(3); 
-    chessClock.setBronsteinValue(5);
-    chessClock.setTournamentMoveCap(10);
-    chessClock.setTournamentPreCapIncrement(5);
-    chessClock.setTournamentPostCapIncrement(10);
-    chessClock.setTournamentAdditionalTimeAfterCap(30000);
+  chessClock.setLeftPlayerTime(300000);
+  chessClock.setRightPlayerTime(300000);
+  chessClock.setClockMode(MODE_TOURNAMENT);
+  chessClock.ledIndicatorEnabled = true;
+  chessClock.setIncrementValue(5);
+  chessClock.setDelayValue(3);
+  chessClock.setBronsteinValue(5);
+  chessClock.setTournamentMoveCap(10);
+  chessClock.setTournamentPreCapIncrement(5);
+  chessClock.setTournamentPostCapIncrement(10);
+  chessClock.setTournamentAdditionalTimeAfterCap(30000);
+  setupAnimation();
 }
 
 void loop(){
@@ -236,53 +356,302 @@ void loop(){
   rightButtonState = analogRead(rightButton);
   menuButtonState = analogRead(menuButton);
   backButtonState = analogRead(backButton);
+  //LEFT BUTTON PRESS
   if(leftButtonState > 800 && !leftPressed){
-    //LEFT BUTTON PRESS
-    if(chessClock.getCurrentPlayer() != PLAYER_RIGHT){
-      tone(buzzerPin, 330, 50);
-      chessClock.playerMove(PLAYER_LEFT);
+    switch(currentScreen){
+      case SCREEN_GAME:{
+        if(gameStarted && chessClock.getCurrentPlayer() == PLAYER_NONE){
+          break;
+        }
+        if (chessClock.getCurrentPlayer() != PLAYER_RIGHT)
+        {
+          if(chessClock.getGameResult() == PLAYER_NONE){
+            tone(buzzerPin, 330, 50);
+          }
+          chessClock.playerMove(PLAYER_LEFT);
+        }
+        gameStarted = true;
+        break;
+      }
+      case SCREEN_MENU_MODE:{
+        //TODO
+        break;
+      }
+      case SCREEN_MENU_MODE_CHANGE:{
+        if(chessClock.getClockMode() == 0){
+          chessClock.setClockMode(5);
+        }else{
+          chessClock.setClockMode(chessClock.getClockMode()-1);
+        }
+        break; 
+      }
+      case SCREEN_MENU_TIME:{ 
+        currentScreen = SCREEN_MENU_MODE;
+        break;
+      }
+      case SCREEN_MENU_TIME_CHANGE:{
+        switch(currentTimeChangeSegment){
+          case 0:{
+            if(chessClock.getLeftPlayerTime()>=3600000){
+              chessClock.setLeftPlayerTime(chessClock.getLeftPlayerTime()-3600000);
+            }
+            break;
+          }
+          case 1:{
+            if (chessClock.getLeftPlayerTime() >= 60000){
+              chessClock.setLeftPlayerTime(chessClock.getLeftPlayerTime() - 60000);
+            }
+            break;
+          }
+          case 2:{
+            if(chessClock.getRightPlayerTime()>=3600000){
+              chessClock.setRightPlayerTime(chessClock.getRightPlayerTime()-3600000);
+            }
+            break;
+          }
+          case 3:{
+            if (chessClock.getRightPlayerTime() >= 60000){
+              chessClock.setRightPlayerTime(chessClock.getRightPlayerTime() - 60000);
+            }
+            break;
+          }
+        }
+        break;
+      }
     }
     leftPressed = true;
   }else if(leftButtonState<100){
     leftPressed = false;
   }
-
+  //RIGHT BUTTON PRESS
   if(rightButtonState > 800 && !rightPressed){
-    //RIGHT BUTTON PRESS
-    if(chessClock.currentPlayer != PLAYER_LEFT){
-      tone(buzzerPin, 330, 50);
-      chessClock.playerMove(PLAYER_RIGHT);
+    switch(currentScreen){
+      case SCREEN_GAME:{
+        if(gameStarted && chessClock.getCurrentPlayer() == PLAYER_NONE){
+          break;
+        }
+        if (chessClock.currentPlayer != PLAYER_LEFT)
+        {
+          if(chessClock.getGameResult() == PLAYER_NONE){
+            tone(buzzerPin, 330, 50);
+          }
+          chessClock.playerMove(PLAYER_RIGHT);
+        }
+        gameStarted = true;
+        break;
+      }
+      case SCREEN_MENU_MODE:{
+        currentScreen = SCREEN_MENU_TIME;
+        break;
+      }
+      case SCREEN_MENU_MODE_CHANGE:
+      {
+        if(chessClock.getClockMode() == 5){
+          chessClock.setClockMode(0);
+        }else{
+          chessClock.setClockMode(chessClock.getClockMode()+1);
+        }
+        break;
+      }
+      case SCREEN_MENU_TIME:
+      {
+        //TODO
+        break;
+      }
+      case SCREEN_MENU_TIME_CHANGE:{
+        switch(currentTimeChangeSegment){
+          case 0:{
+            chessClock.setLeftPlayerTime(chessClock.getLeftPlayerTime() + 3600000);
+            if (chessClock.getLeftPlayerTime() > 86400000){
+              chessClock.setLeftPlayerTime(86400000);
+            }
+            break;
+          }
+          case 1:{
+            chessClock.setLeftPlayerTime(chessClock.getLeftPlayerTime() + 60000);
+            if (chessClock.getLeftPlayerTime() > 86400000){
+              chessClock.setLeftPlayerTime(86400000);
+            }
+            break;
+          }
+          case 2:{
+            chessClock.setRightPlayerTime(chessClock.getRightPlayerTime() + 3600000);
+            if (chessClock.getRightPlayerTime() > 86400000){
+              chessClock.setRightPlayerTime(86400000);
+            }
+            break;
+          }
+          case 3:{
+            chessClock.setRightPlayerTime(chessClock.getRightPlayerTime() + 60000);
+            if (chessClock.getRightPlayerTime() > 86400000){
+              chessClock.setRightPlayerTime(86400000);
+            }
+            break;
+          }
+        }
+        break;
+      }
     }
+
+
     rightPressed = true;
   }else if(rightButtonState<100){
     rightPressed = false;
   }
-
+  //BACK BUTTON PRESS
   if(backButtonState > 800 && !backPressed){
-    //BACK BUTTON PRESS
     tone(buzzerPin, 330, 50);
-    chessClock.playerMove(PLAYER_NONE);
+    switch(currentScreen){
+      case SCREEN_GAME:{
+        if(chessClock.getGameResult() != PLAYER_NONE){
+          digitalWrite(resetPin,LOW);
+        }
+        if(chessClock.getCurrentPlayer() != PLAYER_NONE){
+          lastPlayer = chessClock.getCurrentPlayer();
+          chessClock.setCurrentPlayer(PLAYER_NONE);
+        }else{
+          chessClock.setCurrentPlayer(lastPlayer);
+        }
+        break;
+      }
+      case SCREEN_MENU_MODE:
+      {
+        currentScreen = SCREEN_GAME;
+        break;
+      }
+      case SCREEN_MENU_MODE_CHANGE:{
+        currentScreen = SCREEN_MENU_MODE;
+        break;
+      }
+      case SCREEN_MENU_TIME:{
+        currentScreen = SCREEN_GAME;
+        break;
+      }
+      case SCREEN_MENU_TIME_CHANGE:{
+        currentScreen = SCREEN_MENU_TIME;
+        break;
+      }
+    }
+
+
     backPressed = true;
   }else if(backButtonState<100){
     backPressed = false;
   }
-
+  //MENU BUTTON PRESS
   if(menuButtonState > 800 && !menuPressed){
-    //MENU BUTTON PRESS
     tone(buzzerPin, 330, 50);
-    digitalWrite(resetPin, LOW);
+    switch(currentScreen){
+      case SCREEN_GAME:{
+        if(!gameStarted){
+          currentScreen = SCREEN_MENU_MODE;
+        }else{
+          digitalWrite(resetPin,LOW);
+        }
+        break;
+      }
+      case SCREEN_MENU_MODE:{
+        currentScreen = SCREEN_MENU_MODE_CHANGE;
+        break;
+      }
+      case SCREEN_MENU_MODE_CHANGE:{
+        currentScreen = SCREEN_MENU_MODE_CHANGE;
+        break;
+      }
+      case SCREEN_MENU_TIME:{
+        currentScreen = SCREEN_MENU_TIME_CHANGE;
+        break;
+      }
+      case SCREEN_MENU_TIME_CHANGE:{
+        currentTimeChangeSegment++;
+        if(currentTimeChangeSegment>3){
+          currentTimeChangeSegment = 0;
+        }
+        break;
+      }
+    }
     menuPressed = true;
   }else if(menuButtonState<100){
     menuPressed = false;
   }
-  updateLed(chessClock.getCurrentPlayer());
-  if(chessClock.getGameResult() != PLAYER_NONE && isGameFinished == false){
-    gameEnded();
-    isGameFinished = true;
+
+  //SCREEN DISPLAY
+  switch(currentScreen){
+    case SCREEN_GAME:{
+      updateLed(chessClock.getCurrentPlayer());
+      if (chessClock.getGameResult() != PLAYER_NONE && isGameFinished == false){
+        gameEnded();
+        isGameFinished = true;
+      }
+      screenUpdateLeft(chessClock.getLeftPlayerTime());
+      screenUpdateRight(chessClock.getRightPlayerTime());
+      chessClock.timeUpdate(millis() - lastMilis);
+      break;
+    }
+
+    case SCREEN_MENU_MODE:{
+      screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[chessClock.getClockMode()], digit[DIGIT_EMPTY]);
+      break;
+    }
+
+    case SCREEN_MENU_MODE_CHANGE:{
+      if(lastMilis%flickerTime>flickerTime/4){
+        screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[chessClock.getClockMode()], digit[DIGIT_EMPTY]);
+      }else{
+        screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY]);
+      }
+      break;
+    }
+
+    case SCREEN_MENU_TIME:{
+      screenUpdate(digit[CHAR_H], digit[CHAR_H], digit[CHAR_N], digit[CHAR_N], digit[CHAR_H], digit[CHAR_H], digit[CHAR_N], digit[CHAR_N]);
+      break;
+    }
+
+    case SCREEN_MENU_TIME_CHANGE:{
+      int hl = milisToHours(chessClock.getLeftPlayerTime());
+      int ml = milisToMinutes(chessClock.getLeftPlayerTime());
+      int hr = milisToHours(chessClock.getRightPlayerTime());
+      int mr = milisToMinutes(chessClock.getRightPlayerTime());
+
+      switch (currentTimeChangeSegment){
+        case 0:{
+          if(lastMilis%flickerTime>flickerTime/4){
+            screenUpdate(digit[hl / 10], digit[hl % 10], digit[ml / 10], digit[ml % 10], digit[hr / 10], digit[hr % 10], digit[mr / 10], digit[mr % 10]);
+          }else{
+            screenUpdate(digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[ml / 10], digit[ml % 10], digit[hr / 10], digit[hr % 10], digit[mr / 10], digit[mr % 10]);
+          }
+          break;
+        }
+        case 1:{
+          if(lastMilis%flickerTime>flickerTime/4){
+            screenUpdate(digit[hl / 10], digit[hl % 10], digit[ml / 10], digit[ml % 10], digit[hr / 10], digit[hr % 10], digit[mr / 10], digit[mr % 10]);
+          }else{
+            screenUpdate(digit[hl / 10], digit[hl % 10], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[hr / 10], digit[hr % 10], digit[mr / 10], digit[mr % 10]);
+          }
+          break;
+        }
+        case 2:{
+          if(lastMilis%flickerTime>flickerTime/4){
+            screenUpdate(digit[hl / 10], digit[hl % 10], digit[ml / 10], digit[ml % 10], digit[hr / 10], digit[hr % 10], digit[mr / 10], digit[mr % 10]);
+          }else{
+            screenUpdate(digit[hl / 10], digit[hl % 10], digit[ml / 10], digit[ml % 10], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[mr / 10], digit[mr % 10]);
+          }
+          break;
+        }
+        case 3:{
+          if(lastMilis%flickerTime>flickerTime/4){
+            screenUpdate(digit[hl / 10], digit[hl % 10], digit[ml / 10], digit[ml % 10], digit[hr / 10], digit[hr % 10], digit[mr / 10], digit[mr % 10]);
+          }else{
+            screenUpdate(digit[hl / 10], digit[hl % 10], digit[ml / 10], digit[ml % 10], digit[hr / 10], digit[hr % 10], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY]);
+          }
+          break;
+        }
+      }
+    }
   }
 
-  screenUpdateLeft(chessClock.getLeftPlayerTime());
-  screenUpdateRight(chessClock.getRightPlayerTime());
-  chessClock.timeUpdate(millis()-lastMilis);
   lastMilis = millis();
+  digitalWrite(rightLED, LOW);
+  digitalWrite(leftLED, LOW);
 }

@@ -51,6 +51,7 @@ class ChessClock
         void setTournamentPreCapIncrement(uint16_t value);
         void setTournamentAdditionalTimeAfterCap(uint16_t value);
         void setTournamentPostCapIncrement(uint16_t value);
+        void setCurrentPlayer(int8_t player); 
         void switchLedIndicator(boolean mode);
         void switchSoundIndicator(boolean mode);
         void switchMoveCounter(boolean mode);

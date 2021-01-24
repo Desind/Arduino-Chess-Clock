@@ -41,6 +41,9 @@ void ChessClock::switchSoundIndicator(boolean mode){
 void ChessClock::switchMoveCounter(boolean mode){
     moveCounterEnabled = mode;
 };
+void ChessClock::setCurrentPlayer(int8_t player){
+    currentPlayer = player;
+}
 uint32_t ChessClock::getLeftPlayerTime(){
     return leftPlayerTime;
 };
