@@ -19,21 +19,20 @@ class ChessClock
     private:
         uint32_t leftPlayerTime;                    //TIME LEFT FOR LEFT PLAYER
         uint32_t rightPlayerTime;                   //TIME LEFT FOR RIGHT PLAYER
-        uint16_t leftPlayerMoves;                   //MOVE COUNT FOR LEFT PLAYER    
-        uint16_t rightPlayerMoves;                  //MOVE COUNT FOR RIGHT PLAYER
+        uint32_t leftPlayerMoves;                   //MOVE COUNT FOR LEFT PLAYER    
+        uint32_t rightPlayerMoves;                  //MOVE COUNT FOR RIGHT PLAYER
         int8_t currentPlayer;                       //TURN OF WHICH PLAYER IS NOW
         byte gameResult;                            //RESULT OF THE GAME (GAME ENDED / GAME RUNNING)
         byte clockMode;                             //CURRENT MODE OF THE CLOCK
-        uint16_t incrementValue;                    //VALUE OF INCREMENT TIME
-        uint16_t delayValue;                        //VALUE OF DELAY TIME
-        uint16_t delayLeft;                         //HOW MUCH DELAY IS LEFT FOR CURRENT PLAYER
+        uint32_t incrementValue;                    //VALUE OF INCREMENT TIME
+        uint32_t delayValue;                        //VALUE OF DELAY TIME
+        uint32_t delayLeft;                         //HOW MUCH DELAY IS LEFT FOR CURRENT PLAYER
         uint32_t bronsteinLeft;                     //START OF LEFT PLAYER TURN - NEEDED TO CALCULATE TIME ADDED AFTER TURN
-        uint16_t bronsteinValue;                    //VALUE OF BRONSTEIN INCREMENT TIME
-        uint16_t tournamentMoveCap;                 //HOW MANY MOVES UNTIL ADDITIONAL TIME
-        uint16_t tournamentPreCapIncrement;         //INCREMENT BEFORE MOVE CAP
-        uint16_t tournamentAdditionalTimeAfterCap;  //ADDITIONAL TIME ADDED TO TIMER AFTER MOVE CAP 
-        uint16_t tournamentPostCapIncrement;        //INCREMENT AFTER MOVE CAP
-        boolean ledIndicatorEnabled;                //LED MOVE INDICATOR TOGGLE
+        uint32_t bronsteinValue;                    //VALUE OF BRONSTEIN INCREMENT TIME
+        uint32_t tournamentMoveCap;                 //HOW MANY MOVES UNTIL ADDITIONAL TIME
+        uint32_t tournamentPreCapIncrement;         //INCREMENT BEFORE MOVE CAP
+        uint32_t tournamentAdditionalTimeAfterCap;  //ADDITIONAL TIME ADDED TO TIMER AFTER MOVE CAP 
+        uint32_t tournamentPostCapIncrement;        //INCREMENT AFTER MOVE CAP
         boolean soundIndicatorEnabled;              //SOUND MOVE INDICATOR TOGGLE
         boolean moveCounterEnabled;                 //VALUE TO DETERMINE IF THERE IS NEED TO DRAW MOVE COUNTER
 
@@ -44,15 +43,14 @@ class ChessClock
         void setLeftPlayerTime(uint32_t time);
         void setRightPlayerTime(uint32_t time);
         void setClockMode(byte clockMode);
-        void setIncrementValue(uint16_t value);
-        void setDelayValue(uint16_t value);
-        void setBronsteinValue(uint16_t value);
-        void setTournamentMoveCap(uint16_t value);
-        void setTournamentPreCapIncrement(uint16_t value);
-        void setTournamentAdditionalTimeAfterCap(uint16_t value);
-        void setTournamentPostCapIncrement(uint16_t value);
+        void setIncrementValue(uint32_t value);
+        void setDelayValue(uint32_t value);
+        void setBronsteinValue(uint32_t value);
+        void setTournamentMoveCap(uint32_t value);
+        void setTournamentPreCapIncrement(uint32_t value);
+        void setTournamentAdditionalTimeAfterCap(uint32_t value);
+        void setTournamentPostCapIncrement(uint32_t value);
         void setCurrentPlayer(int8_t player); 
-        void switchLedIndicator(boolean mode);
         void switchSoundIndicator(boolean mode);
         void switchMoveCounter(boolean mode);
 
@@ -63,19 +61,18 @@ class ChessClock
 
         uint32_t getLeftPlayerTime();
         uint32_t getRightPlayerTime();
-        uint16_t getLeftPlayerMoves();
-        uint16_t getRightPlayerMoves();
+        uint32_t getLeftPlayerMoves();
+        uint32_t getRightPlayerMoves();
         int8_t getCurrentPlayer();
         byte getGameResult();
         byte getClockMode();
-        uint16_t getIncrementValue();
-        uint16_t getDelayValue();
-        uint16_t getBronsteinValue();
-        uint16_t getTournamentMoveCap();          
-        uint16_t getTournamentPreCapIncrement();       
-        uint16_t getTournamentAdditionalTimeAfterCap(); 
-        uint16_t getTournamentPostCapIncrement();
-        boolean getLedIndicatorEnabled();
+        uint32_t getIncrementValue();
+        uint32_t getDelayValue();
+        uint32_t getBronsteinValue();
+        uint32_t getTournamentMoveCap();          
+        uint32_t getTournamentPreCapIncrement();       
+        uint32_t getTournamentAdditionalTimeAfterCap(); 
+        uint32_t getTournamentPostCapIncrement();
         boolean getSoundIndicatorEnabled();
         boolean getMoveCounterEnabled();
 

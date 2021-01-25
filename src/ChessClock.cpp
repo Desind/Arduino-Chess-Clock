@@ -9,31 +9,28 @@ void ChessClock::setRightPlayerTime(uint32_t time){
 void ChessClock::setClockMode(byte mode){
     clockMode = mode;
 };
-void ChessClock::setIncrementValue(uint16_t value){
+void ChessClock::setIncrementValue(uint32_t value){
     incrementValue = value*1000;
 };
-void ChessClock::setDelayValue(uint16_t value){
+void ChessClock::setDelayValue(uint32_t value){
     delayValue = value*1000;
     delayLeft = delayValue;
 };
-void ChessClock::setBronsteinValue(uint16_t value){
+void ChessClock::setBronsteinValue(uint32_t value){
     bronsteinValue = value*1000;
     bronsteinLeft = bronsteinValue;
 };
-void ChessClock::setTournamentMoveCap(uint16_t value){
+void ChessClock::setTournamentMoveCap(uint32_t value){
     tournamentMoveCap = value;
 };
-void ChessClock::setTournamentPreCapIncrement(uint16_t value){
+void ChessClock::setTournamentPreCapIncrement(uint32_t value){
     tournamentPreCapIncrement = value*1000;
 };
-void ChessClock::setTournamentAdditionalTimeAfterCap(uint16_t value){
+void ChessClock::setTournamentAdditionalTimeAfterCap(uint32_t value){
     tournamentAdditionalTimeAfterCap = value;
 };
-void ChessClock::setTournamentPostCapIncrement(uint16_t value){
+void ChessClock::setTournamentPostCapIncrement(uint32_t value){
     tournamentPostCapIncrement = value*1000;
-};
-void ChessClock::switchLedIndicator(boolean mode){
-    ledIndicatorEnabled = mode;
 };
 void ChessClock::switchSoundIndicator(boolean mode){
     soundIndicatorEnabled = mode;
@@ -50,10 +47,10 @@ uint32_t ChessClock::getLeftPlayerTime(){
 uint32_t ChessClock::getRightPlayerTime(){
     return rightPlayerTime;
 };
-uint16_t ChessClock::getLeftPlayerMoves(){
+uint32_t ChessClock::getLeftPlayerMoves(){
     return leftPlayerMoves;
 };
-uint16_t ChessClock::getRightPlayerMoves(){
+uint32_t ChessClock::getRightPlayerMoves(){
     return rightPlayerMoves;
 };
 int8_t ChessClock::getCurrentPlayer(){
@@ -65,29 +62,26 @@ byte ChessClock::getGameResult(){
 byte ChessClock::getClockMode(){
     return clockMode;
 };
-uint16_t ChessClock::getIncrementValue(){
+uint32_t ChessClock::getIncrementValue(){
     return incrementValue;
 };
-uint16_t ChessClock::getDelayValue(){
+uint32_t ChessClock::getDelayValue(){
     return delayValue;
 };
-uint16_t ChessClock::getBronsteinValue(){
+uint32_t ChessClock::getBronsteinValue(){
     return bronsteinValue;
 };
-uint16_t ChessClock::getTournamentMoveCap(){
+uint32_t ChessClock::getTournamentMoveCap(){
     return tournamentMoveCap;
 };
-uint16_t ChessClock::getTournamentPreCapIncrement(){
+uint32_t ChessClock::getTournamentPreCapIncrement(){
     return tournamentPreCapIncrement;
 };
-uint16_t ChessClock::getTournamentAdditionalTimeAfterCap(){
+uint32_t ChessClock::getTournamentAdditionalTimeAfterCap(){
     return tournamentAdditionalTimeAfterCap;
 };
-uint16_t ChessClock::getTournamentPostCapIncrement(){
+uint32_t ChessClock::getTournamentPostCapIncrement(){
     return tournamentPostCapIncrement;
-};
-boolean ChessClock::getLedIndicatorEnabled(){
-    return ledIndicatorEnabled;
 };
 boolean ChessClock::getSoundIndicatorEnabled(){
     return soundIndicatorEnabled;
