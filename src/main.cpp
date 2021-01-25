@@ -7,13 +7,22 @@
 #define CHAR_t 23
 #define CHAR_H 24
 #define CHAR_N 25
+#define CHAR_n 26
+#define CHAR_c 27
+
 #define SCREEN_GAME 0
 #define SCREEN_MENU_MODE 1
 #define SCREEN_MENU_MODE_CHANGE 2
 #define SCREEN_MENU_TIME 3
 #define SCREEN_MENU_TIME_CHANGE 4
+#define SCREEN_MENU_INCREMENT 5
+#define SCREEN_MENU_INCREMENT_CHANGE 6
+#define SCREEN_MENU_DELAY 7
+#define SCREEN_MENU_DELAY_CHANGE 8
+#define SCREEN_MENU_BRONSTEIN 9
+#define SCREEN_MENU_BRONSTEIN_CHANGE 10
 
-const byte digit[26] = {
+const byte digit[28] = {
     B11111101, //0.
     B01100001, //1.
     B11011011, //2.
@@ -39,7 +48,9 @@ const byte digit[26] = {
     B10011110, //E 
     B00011110, //t
     B01101111, //H.
-    B11101100, //N
+    B11101101, //N
+    B00101010, //n
+    B00011010, //c
 };
 
 const byte setupAnim[28] = {
@@ -339,8 +350,8 @@ void setup(){
 
   chessClock.setLeftPlayerTime(300000);
   chessClock.setRightPlayerTime(300000);
-  chessClock.setClockMode(MODE_TOURNAMENT);
-  chessClock.ledIndicatorEnabled = true;
+  chessClock.setClockMode(MODE_SUDDEN_DEATH);
+  chessClock.switchLedIndicator(true);
   chessClock.setIncrementValue(5);
   chessClock.setDelayValue(3);
   chessClock.setBronsteinValue(5);
@@ -418,6 +429,42 @@ void loop(){
         }
         break;
       }
+      case SCREEN_MENU_INCREMENT:{
+        currentScreen = SCREEN_MENU_TIME;
+        break;
+      }
+      case SCREEN_MENU_INCREMENT_CHANGE:{      
+        if(chessClock.getIncrementValue()<1000){
+          chessClock.setIncrementValue(0);
+        }else{
+          chessClock.setIncrementValue(chessClock.getIncrementValue()/1000-1);
+        }
+        break;
+      }
+      case SCREEN_MENU_DELAY:{
+        currentScreen = SCREEN_MENU_INCREMENT;
+        break;
+      }
+      case SCREEN_MENU_DELAY_CHANGE:{
+        if(chessClock.getDelayValue()<1000){
+          chessClock.setDelayValue(0);
+        }else{
+          chessClock.setDelayValue(chessClock.getDelayValue()/1000-1);
+        }
+        break;
+      }
+      case SCREEN_MENU_BRONSTEIN:{
+        currentScreen = SCREEN_MENU_DELAY;
+        break;
+      }
+      case SCREEN_MENU_BRONSTEIN_CHANGE:{
+        if(chessClock.getBronsteinValue()<1000){
+          chessClock.setBronsteinValue(0);
+        }else{
+          chessClock.setBronsteinValue(chessClock.getBronsteinValue()/1000-1);
+        }
+        break;
+      }
     }
     leftPressed = true;
   }else if(leftButtonState<100){
@@ -430,7 +477,7 @@ void loop(){
         if(gameStarted && chessClock.getCurrentPlayer() == PLAYER_NONE){
           break;
         }
-        if (chessClock.currentPlayer != PLAYER_LEFT)
+        if (chessClock.getCurrentPlayer() != PLAYER_LEFT)
         {
           if(chessClock.getGameResult() == PLAYER_NONE){
             tone(buzzerPin, 330, 50);
@@ -444,8 +491,7 @@ void loop(){
         currentScreen = SCREEN_MENU_TIME;
         break;
       }
-      case SCREEN_MENU_MODE_CHANGE:
-      {
+      case SCREEN_MENU_MODE_CHANGE:{
         if(chessClock.getClockMode() == 5){
           chessClock.setClockMode(0);
         }else{
@@ -453,9 +499,8 @@ void loop(){
         }
         break;
       }
-      case SCREEN_MENU_TIME:
-      {
-        //TODO
+      case SCREEN_MENU_TIME:{
+        currentScreen = SCREEN_MENU_INCREMENT;
         break;
       }
       case SCREEN_MENU_TIME_CHANGE:{
@@ -491,6 +536,30 @@ void loop(){
         }
         break;
       }
+      case SCREEN_MENU_INCREMENT:{
+        currentScreen = SCREEN_MENU_DELAY;
+        break;
+      }
+      case SCREEN_MENU_INCREMENT_CHANGE:{
+        chessClock.setIncrementValue(chessClock.getIncrementValue()/1000 + 1);
+        break;
+      }
+      case SCREEN_MENU_DELAY:{
+        currentScreen = SCREEN_MENU_BRONSTEIN;
+        break;
+      }
+      case SCREEN_MENU_DELAY_CHANGE:{
+        chessClock.setDelayValue(chessClock.getDelayValue() / 1000 + 1);
+        break;
+      }
+      case SCREEN_MENU_BRONSTEIN:{
+
+        break;
+      }
+      case SCREEN_MENU_BRONSTEIN_CHANGE:{
+        chessClock.setBronsteinValue(chessClock.getBronsteinValue() / 1000 + 1);
+        break;
+      }
     }
 
 
@@ -514,8 +583,7 @@ void loop(){
         }
         break;
       }
-      case SCREEN_MENU_MODE:
-      {
+      case SCREEN_MENU_MODE:{
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -531,8 +599,31 @@ void loop(){
         currentScreen = SCREEN_MENU_TIME;
         break;
       }
+      case SCREEN_MENU_INCREMENT:{
+        currentScreen = SCREEN_GAME;
+        break;
+      }
+      case SCREEN_MENU_INCREMENT_CHANGE:{
+        currentScreen = SCREEN_MENU_INCREMENT;
+        break;
+      }
+      case SCREEN_MENU_DELAY:{
+        currentScreen = SCREEN_GAME;
+        break;
+      }
+      case SCREEN_MENU_DELAY_CHANGE:{
+        currentScreen = SCREEN_MENU_DELAY;
+        break;
+      }
+      case SCREEN_MENU_BRONSTEIN:{
+        currentScreen = SCREEN_GAME;
+        break;
+      }
+      case SCREEN_MENU_BRONSTEIN_CHANGE:{
+        currentScreen = SCREEN_MENU_BRONSTEIN;
+        break;
+      }
     }
-
 
     backPressed = true;
   }else if(backButtonState<100){
@@ -569,6 +660,30 @@ void loop(){
         }
         break;
       }
+      case SCREEN_MENU_INCREMENT:{
+        currentScreen = SCREEN_MENU_INCREMENT_CHANGE;
+        break;
+      }
+      case SCREEN_MENU_INCREMENT_CHANGE:{
+    
+      break;
+    }
+      case SCREEN_MENU_DELAY:{
+        currentScreen = SCREEN_MENU_DELAY_CHANGE;
+        break;  
+      }
+      case SCREEN_MENU_DELAY_CHANGE:{
+
+        break;
+      }
+      case SCREEN_MENU_BRONSTEIN:{
+        currentScreen = SCREEN_MENU_BRONSTEIN_CHANGE;
+        break;
+      }
+      case SCREEN_MENU_BRONSTEIN_CHANGE:{
+      
+        break;
+      }
     }
     menuPressed = true;
   }else if(menuButtonState<100){
@@ -590,13 +705,63 @@ void loop(){
     }
 
     case SCREEN_MENU_MODE:{
-      screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[chessClock.getClockMode()], digit[DIGIT_EMPTY]);
+      switch (chessClock.getClockMode()){
+        case MODE_SUDDEN_DEATH:{
+          screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, B00000000, B00000000, B10110110, B01111010);
+          break;
+        }
+        case MODE_INCREMENT:{
+          screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, B00000000, B01100000, B00101010, B00011010);
+          break;
+        }
+        case MODE_DELAY:{
+          screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, B00000000, B01111010, B10011110, B00011100);
+          break;
+        }
+        case MODE_HOURGLASS:{
+          screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, B00000000, B01101110, B00001010, B10111100);
+          break;
+        }
+        case MODE_BRONSTEIN:{
+          screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, B00111110, B00001010, B00101010, B01111010);
+          break;
+        }
+        case MODE_TOURNAMENT:{
+          screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, B00011110, B00001010, B00101010, B00011110);
+          break;
+        }
+      }
       break;
     }
 
     case SCREEN_MENU_MODE_CHANGE:{
       if(lastMilis%flickerTime>flickerTime/4){
-        screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[chessClock.getClockMode()], digit[DIGIT_EMPTY]);
+        switch (chessClock.getClockMode()){
+          case MODE_SUDDEN_DEATH:{
+            screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, B00000000, B00000000, B10110110, B01111010);
+            break;
+          }
+          case MODE_INCREMENT:{
+            screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, B00000000, B01100000, B00101010, B00011010);
+            break;
+          }
+          case MODE_DELAY:{
+            screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, B00000000, B01111010, B10011110, B00011100);
+            break;
+          }
+          case MODE_HOURGLASS:{
+            screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, B00000000, B01101110, B00001010, B10111100);
+            break;
+          }
+          case MODE_BRONSTEIN:{
+            screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, B00111110, B00001010, B00101010, B01111010);
+            break;
+          }
+          case MODE_TOURNAMENT:{
+            screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, B00011110, B00001010, B00101010, B00011110);
+            break;
+          }
+        }
       }else{
         screenUpdate(digit[CHAR_S], B10011110, B00011110, B00011110, digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY]);
       }
@@ -648,6 +813,54 @@ void loop(){
           break;
         }
       }
+    }
+  
+    case SCREEN_MENU_INCREMENT:{
+      screenUpdate(digit[11], digit[CHAR_n], digit[CHAR_c], digit[DIGIT_EMPTY], digit[CHAR_N], digit[CHAR_N], digit[CHAR_S], digit[CHAR_S]);
+      break;
+    }
+    
+    case SCREEN_MENU_INCREMENT_CHANGE:{
+      int m = milisToMinutes(chessClock.getIncrementValue());
+      int s = milisToSeconds(chessClock.getIncrementValue());
+      if(lastMilis%flickerTime>flickerTime/4){
+        screenUpdate(digit[11], digit[CHAR_n], digit[CHAR_c], digit[DIGIT_EMPTY], digit[m/10], digit[m%10], digit[s/10], digit[s%10]);
+      }else{
+        screenUpdate(digit[11], digit[CHAR_n], digit[CHAR_c], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY]);
+      }
+      break;
+    }
+
+    case SCREEN_MENU_DELAY:{
+      screenUpdate(B01111010, B10011110, B00011100, digit[DIGIT_EMPTY], digit[CHAR_N], digit[CHAR_N], digit[CHAR_S], digit[CHAR_S]);
+      break;
+    }
+
+    case SCREEN_MENU_DELAY_CHANGE:{
+      int m = milisToMinutes(chessClock.getDelayValue());
+      int s = milisToSeconds(chessClock.getDelayValue());
+      if(lastMilis%flickerTime>flickerTime/4){
+        screenUpdate(B01111010, B10011110, B00011100, digit[DIGIT_EMPTY], digit[m / 10], digit[m % 10], digit[s / 10], digit[s % 10]);
+      }else{
+        screenUpdate(B01111010, B10011110, B00011100, digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY]);
+      }
+      break;
+    }
+
+    case SCREEN_MENU_BRONSTEIN:{
+      screenUpdate(B00111110, B00001010, B00101010, B01111010, digit[CHAR_N], digit[CHAR_N], digit[CHAR_S], digit[CHAR_S]); 
+      break;
+    }
+
+    case SCREEN_MENU_BRONSTEIN_CHANGE:{
+      int m = milisToMinutes(chessClock.getBronsteinValue());
+      int s = milisToSeconds(chessClock.getBronsteinValue());
+      if(lastMilis%flickerTime>flickerTime/4){
+        screenUpdate(B00111110, B00001010, B00101010, B01111010, digit[m / 10], digit[m % 10], digit[s / 10], digit[s % 10]);
+      }else{
+        screenUpdate(B00111110, B00001010, B00101010, B01111010, digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY]);
+      }
+      break;
     }
   }
 

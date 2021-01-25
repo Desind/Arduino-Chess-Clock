@@ -16,7 +16,7 @@
 
 class ChessClock
 {
-    public:
+    private:
         uint32_t leftPlayerTime;                    //TIME LEFT FOR LEFT PLAYER
         uint32_t rightPlayerTime;                   //TIME LEFT FOR RIGHT PLAYER
         uint16_t leftPlayerMoves;                   //MOVE COUNT FOR LEFT PLAYER    
