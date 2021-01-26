@@ -14,6 +14,26 @@
 #define PLAYER_RIGHT 1
 #define PLAYER_NONE 0
 
+#define PRESET_1i0 0
+#define PRESET_1i1 1
+#define PRESET_2i0 2
+#define PRESET_2i1 3
+#define PRESET_3i0 4
+#define PRESET_3i2 5
+#define PRESET_5i0 6
+#define PRESET_5i5 7
+#define PRESET_10i0 8
+#define PRESET_10i5 9
+#define PRESET_15i0 10
+#define PRESET_15i10 11
+#define PRESET_20i0 12
+#define PRESET_30i0 13
+#define PRESET_45i45 14
+#define PRESET_60i0 15
+#define PRESET_90i0 16
+#define PRESET_90c40a30i30 17
+#define PRESET_120c40a60c60a40i0 18
+
 class ChessClock
 {
     private:
@@ -33,6 +53,9 @@ class ChessClock
         uint32_t tournamentPreCapIncrement;         //INCREMENT BEFORE MOVE CAP
         uint32_t tournamentAdditionalTimeAfterCap;  //ADDITIONAL TIME ADDED TO TIMER AFTER MOVE CAP 
         uint32_t tournamentPostCapIncrement;        //INCREMENT AFTER MOVE CAP
+        uint32_t tournamentMoveCap2;
+        uint32_t tournamentPostCap2Increment;
+        uint32_t tournamentAdditionalTimeAfterCap2;
         boolean soundIndicatorEnabled;              //SOUND MOVE INDICATOR TOGGLE
         boolean moveCounterEnabled;                 //VALUE TO DETERMINE IF THERE IS NEED TO DRAW MOVE COUNTER
 
@@ -50,6 +73,9 @@ class ChessClock
         void setTournamentPreCapIncrement(uint32_t value);
         void setTournamentAdditionalTimeAfterCap(uint32_t value);
         void setTournamentPostCapIncrement(uint32_t value);
+        void setTournamentMoveCap2(uint32_t value);
+        void setTournamentPostCap2Increment(uint32_t value);
+        void setTournamentAdditionalTimeAfterCap2(uint32_t value);
         void setCurrentPlayer(int8_t player); 
         void switchSoundIndicator(boolean mode);
         void switchMoveCounter(boolean mode);
@@ -73,6 +99,9 @@ class ChessClock
         uint32_t getTournamentPreCapIncrement();       
         uint32_t getTournamentAdditionalTimeAfterCap(); 
         uint32_t getTournamentPostCapIncrement();
+        uint32_t getTournamentMoveCap2();
+        uint32_t getTournamentPostCap2Increment();
+        uint32_t getTournamentAdditionalTimeAfterCap2();
         boolean getSoundIndicatorEnabled();
         boolean getMoveCounterEnabled();
 
