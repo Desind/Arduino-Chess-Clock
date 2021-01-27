@@ -370,25 +370,180 @@ void ChessClock::playerMove(int8_t player){
     }
 };
 void ChessClock::loadPreset(byte preset){
+    incrementValue = 0;
+    delayValue = 0;
+    bronsteinValue = 0;
+    tournamentMoveCap = 0;
+    tournamentPreCapIncrement = 0;
+    tournamentAdditionalTimeAfterCap = 0;
+    tournamentPostCapIncrement = 0;
+    tournamentMoveCap2 = 0;
+    tournamentPostCap2Increment = 0;
+    tournamentAdditionalTimeAfterCap2 = 0;
+    soundIndicatorEnabled = false;
+    moveCounterEnabled = false;
     switch(preset){
         case PRESET_1i0:{
-            leftPlayerTime;                   //TIME LEFT FOR LEFT PLAYER
-            rightPlayerTime;                  //TIME LEFT FOR RIGHT PLAYER
-            clockMode;                            //CURRENT MODE OF THE CLOCK
-            incrementValue;                   //VALUE OF INCREMENT TIME
-            delayValue;                       //VALUE OF DELAY TIME
-            delayLeft;                        //HOW MUCH DELAY IS LEFT FOR CURRENT PLAYER
-            bronsteinLeft;                    //START OF LEFT PLAYER TURN - NEEDED TO CALCULATE TIME ADDED AFTER TURN
-            bronsteinValue;                   //VALUE OF BRONSTEIN INCREMENT TIME
-            tournamentMoveCap;                //HOW MANY MOVES UNTIL ADDITIONAL TIME
-            tournamentPreCapIncrement;        //INCREMENT BEFORE MOVE CAP
-            tournamentAdditionalTimeAfterCap; //ADDITIONAL TIME ADDED TO TIMER AFTER MOVE CAP
-            tournamentPostCapIncrement;       //INCREMENT AFTER MOVE CAP
-            tournamentMoveCap2;
-            tournamentPostCap2Increment;
-            tournamentAdditionalTimeAfterCap2;
+            leftPlayerTime = 60000;
+            rightPlayerTime = 60000;
+            clockMode = MODE_SUDDEN_DEATH;
+            soundIndicatorEnabled = true;
+            break;
         }
-    
+        case PRESET_1i1:{
+            leftPlayerTime = 60000;
+            rightPlayerTime = 60000;
+            clockMode = MODE_INCREMENT;
+            incrementValue = 1000;
+            soundIndicatorEnabled = true;
+            break;
+        }
+        case PRESET_2i0:{
+            leftPlayerTime = 120000;
+            rightPlayerTime = 120000;
+            clockMode = MODE_SUDDEN_DEATH;
+            soundIndicatorEnabled = true;
+            break;
+        }
+        case PRESET_2i1:{
+            leftPlayerTime = 120000;
+            rightPlayerTime = 120000;
+            clockMode = MODE_INCREMENT;
+            incrementValue = 1000;
+            soundIndicatorEnabled = true;
+            break;
+        }
+        case PRESET_3i0:{
+            leftPlayerTime = 180000;
+            rightPlayerTime = 180000;
+            clockMode = MODE_SUDDEN_DEATH;
+            soundIndicatorEnabled = true;
+            break;
+        }
+        case PRESET_3i2:{
+            leftPlayerTime = 180000;
+            rightPlayerTime = 180000;
+            clockMode = MODE_INCREMENT;
+            incrementValue = 2000;
+            soundIndicatorEnabled = true;
+            break;
+        }
+        case PRESET_5i0:{
+            leftPlayerTime = 300000;
+            rightPlayerTime = 300000;
+            clockMode = MODE_SUDDEN_DEATH;
+            soundIndicatorEnabled = true;
+            break;
+        }
+        case PRESET_5i5:{
+            leftPlayerTime = 300000;
+            rightPlayerTime = 300000;
+            clockMode = MODE_INCREMENT;
+            incrementValue = 5000;
+            soundIndicatorEnabled = true;
+            break;
+        }
+        case PRESET_10i0:{
+            leftPlayerTime = 600000;
+            rightPlayerTime = 600000;
+            clockMode = MODE_SUDDEN_DEATH;
+            soundIndicatorEnabled = true;
+            break;
+        }
+        case PRESET_10i5:{
+            leftPlayerTime = 600000;
+            rightPlayerTime = 600000;
+            clockMode = MODE_INCREMENT;
+            incrementValue = 5000;
+            soundIndicatorEnabled = true;
+            break;
+        }
+        case PRESET_15i0:{
+            leftPlayerTime = 900000;
+            rightPlayerTime = 900000;
+            clockMode = MODE_SUDDEN_DEATH;
+            soundIndicatorEnabled = true;
+            break;
+        }
+        case PRESET_15i10:{
+            leftPlayerTime = 900000;
+            rightPlayerTime = 900000;
+            clockMode = MODE_INCREMENT;
+            incrementValue = 10000;
+            soundIndicatorEnabled = true;
+            moveCounterEnabled = true;
+            break;
+        }
+        case PRESET_20i0:{
+            leftPlayerTime = 1200000;
+            rightPlayerTime = 1200000;
+            clockMode = MODE_SUDDEN_DEATH;
+            soundIndicatorEnabled = true;
+            moveCounterEnabled = true;
+            break;
+        }
+        case PRESET_30i0:{
+            leftPlayerTime = 1800000;
+            rightPlayerTime = 1800000;
+            clockMode = MODE_SUDDEN_DEATH;
+            soundIndicatorEnabled = true;
+            moveCounterEnabled = true;
+            break;
+        }
+        case PRESET_45i45:{
+            leftPlayerTime = 2700000;
+            rightPlayerTime = 2700000;
+            clockMode = MODE_INCREMENT;
+            incrementValue = 45000;
+            soundIndicatorEnabled = true;
+            moveCounterEnabled = true;
+        }
+        case PRESET_60i0:{
+            leftPlayerTime = 3600000;
+            rightPlayerTime = 3600000;
+            clockMode = MODE_SUDDEN_DEATH;
+            soundIndicatorEnabled = true;
+            moveCounterEnabled = true;
+            break;
+        }
+        case PRESET_90i0:{
+            leftPlayerTime = 5400000;
+            rightPlayerTime = 5400000;
+            clockMode = MODE_SUDDEN_DEATH;
+            soundIndicatorEnabled = true;
+            moveCounterEnabled = true;
+            break;
+        }
+        case PRESET_90c40a30i30:{
+            leftPlayerTime = 5400000;
+            rightPlayerTime = 5400000;
+            clockMode = MODE_TOURNAMENT;
+            tournamentMoveCap = 40;
+            tournamentPreCapIncrement = 0;
+            tournamentAdditionalTimeAfterCap = 1800000;
+            tournamentPostCapIncrement = 0;
+            tournamentMoveCap2 = 40;
+            tournamentPostCap2Increment = 30000;
+            tournamentAdditionalTimeAfterCap2 = 0;
+            soundIndicatorEnabled = true;
+            moveCounterEnabled = true;
+            break;
+        }
+        case PRESET_120c40a60c60a40i0:{
+            leftPlayerTime = 7200000;
+            rightPlayerTime = 7200000;
+            clockMode = MODE_TOURNAMENT;
+            tournamentMoveCap = 40;
+            tournamentPreCapIncrement = 0;
+            tournamentAdditionalTimeAfterCap = 3600000;
+            tournamentPostCapIncrement = 0;
+            tournamentMoveCap2 = 60;
+            tournamentPostCap2Increment = 30000;
+            tournamentAdditionalTimeAfterCap2 = 2400000;
+            soundIndicatorEnabled = true;
+            moveCounterEnabled = true;
+            break;
+        }
     }
 };
 

@@ -151,6 +151,7 @@ bool gameStarted = false;
 uint16_t flickerTime = 1000;
 int currentTimeChangeSegment = 0;
 uint16_t showCounterTime = 0;
+uint8_t presetLoad = 0;
 
 byte currentScreen = 0;
 
@@ -685,7 +686,11 @@ void loop(){
         break;
       }
       case SCREEN_MENU_PRESET_LOAD:{
-      
+        if(presetLoad>0){
+          presetLoad--;
+        }else{
+          presetLoad = 18;
+        }
         break;
       }
       case SCREEN_MENU_USER_PRESET:{
@@ -908,7 +913,11 @@ void loop(){
         break;
       }
       case SCREEN_MENU_PRESET_LOAD:{
-      
+        if(presetLoad<18){
+          presetLoad++;
+        }else{
+          presetLoad = 0;
+        }
         break;
       }
       case SCREEN_MENU_USER_PRESET:{
@@ -1233,7 +1242,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_PRESET_LOAD:{
-      
+        chessClock.loadPreset(presetLoad);
         break;
       }
       case SCREEN_MENU_USER_PRESET:{
@@ -1618,7 +1627,7 @@ void loop(){
     }
 
     case SCREEN_MENU_PRESET_LOAD:{
-      screenUpdate(B00011100, B00111010, B11101110, B01111010, B00000000, B00000000, B00000000, B00000000);
+      screenUpdate(B00011100, B00111010, B11101110, B01111010, B00000000, digit[presetLoad/10+10], digit[presetLoad%10+10], B00000000);
       break;
     }
 
