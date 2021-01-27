@@ -497,6 +497,7 @@ void ChessClock::loadPreset(byte preset){
             incrementValue = 45000;
             soundIndicatorEnabled = true;
             moveCounterEnabled = true;
+            break;
         }
         case PRESET_60i0:{
             leftPlayerTime = 3600000;

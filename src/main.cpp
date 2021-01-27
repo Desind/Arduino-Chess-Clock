@@ -271,21 +271,33 @@ void screenMovesLeft(int moves){
   digitalWrite(digit1, HIGH);
   digitalWrite(latch, HIGH);
   //DIGIT 2
-  shiftOut(data, clock, MSBFIRST, digit[moves/10+10]);
+  if(moves<100){
+    shiftOut(data, clock, MSBFIRST, digit[moves / 10 + 10]);
+  }else{
+    shiftOut(data, clock, MSBFIRST, digit[moves / 100 + 10]);
+  }
   digitalWrite(latch, LOW);
   digitalWrite(digit2, LOW);
   delay(digitDelay);
   digitalWrite(digit2, HIGH);
   digitalWrite(latch, HIGH);
   //DIGIT 3
-  shiftOut(data, clock, MSBFIRST, digit[moves % 10+10]);
+  if(moves<100){
+    shiftOut(data, clock, MSBFIRST, digit[moves % 10+10]);
+  }else{
+    shiftOut(data, clock, MSBFIRST, digit[((moves / 10)-(moves/100)*10) + 10]);
+  }
   digitalWrite(latch, LOW);
   digitalWrite(digit3, LOW);
   delay(digitDelay);
   digitalWrite(digit3, HIGH);
   digitalWrite(latch, HIGH);
   //DIGIT 4
-  shiftOut(data, clock, MSBFIRST, digit[DIGIT_EMPTY]);
+  if(moves<100){
+    shiftOut(data, clock, MSBFIRST, digit[DIGIT_EMPTY]);
+  }else{
+    shiftOut(data, clock, MSBFIRST, digit[moves % 10 + 10]);
+  }
   digitalWrite(latch, LOW);
   digitalWrite(digit4, LOW);
   delay(digitDelay);
@@ -300,21 +312,33 @@ void screenMovesRight(int moves){
   digitalWrite(digit5, HIGH);
   digitalWrite(latch, HIGH);
   //DIGIT 6
-  shiftOut(data, clock, MSBFIRST, digit[moves / 10 + 10]);
+  if(moves<100){
+    shiftOut(data, clock, MSBFIRST, digit[moves / 10 + 10]);
+  }else{
+    shiftOut(data, clock, MSBFIRST, digit[moves / 100 + 10]);
+  }
   digitalWrite(latch, LOW);
   digitalWrite(digit6, LOW);
   delay(digitDelay);
   digitalWrite(digit6, HIGH);
   digitalWrite(latch, HIGH);
   //DIGIT 7
-  shiftOut(data, clock, MSBFIRST, digit[moves % 10 + 10]);
+  if(moves<100){
+    shiftOut(data, clock, MSBFIRST, digit[moves % 10+10]);
+  }else{
+    shiftOut(data, clock, MSBFIRST, digit[((moves / 10)-(moves/100)*10) + 10]);
+  }
   digitalWrite(latch, LOW);
   digitalWrite(digit7, LOW);
   delay(digitDelay);
   digitalWrite(digit7, HIGH);
   digitalWrite(latch, HIGH);
   //DIGIT 8
-  shiftOut(data, clock, MSBFIRST, digit[DIGIT_EMPTY]);
+  if(moves<100){
+    shiftOut(data, clock, MSBFIRST, digit[DIGIT_EMPTY]);
+  }else{
+    shiftOut(data, clock, MSBFIRST, digit[moves % 10 + 10]);
+  }
   digitalWrite(latch, LOW);
   digitalWrite(digit8, LOW);
   delay(digitDelay);
@@ -473,7 +497,9 @@ void loop(){
           }
           chessClock.playerMove(PLAYER_LEFT);
         }
-        showCounterTime = MOVE_COUNTER_SHOW_TIME;
+        if(!isGameFinished){
+          showCounterTime = MOVE_COUNTER_SHOW_TIME;
+        }
         gameStarted = true;
         break;
       }
@@ -724,14 +750,15 @@ void loop(){
         if(gameStarted && chessClock.getCurrentPlayer() == PLAYER_NONE){
           break;
         }
-        if (chessClock.getCurrentPlayer() != PLAYER_LEFT)
-        {
+        if (chessClock.getCurrentPlayer() != PLAYER_LEFT){
           if(chessClock.getGameResult() == PLAYER_NONE){
             if(chessClock.getSoundIndicatorEnabled()) tone(buzzerPin, 330, 50);
           }
           chessClock.playerMove(PLAYER_RIGHT);
         }
-        showCounterTime = MOVE_COUNTER_SHOW_TIME;
+        if (!isGameFinished){
+          showCounterTime = MOVE_COUNTER_SHOW_TIME;
+        }
         gameStarted = true;
         break;
       }
@@ -958,6 +985,7 @@ void loop(){
         if(chessClock.getCurrentPlayer() != PLAYER_NONE){
           lastPlayer = chessClock.getCurrentPlayer();
           chessClock.setCurrentPlayer(PLAYER_NONE);
+          showCounterTime=0;
         }else{
           chessClock.setCurrentPlayer(lastPlayer);
         }
@@ -1282,6 +1310,15 @@ void loop(){
         }else if(chessClock.getCurrentPlayer() == PLAYER_RIGHT){
           screenMovesLeft(chessClock.getLeftPlayerMoves());
           screenUpdateRight(chessClock.getRightPlayerTime());
+        }else if(chessClock.getCurrentPlayer() == PLAYER_NONE){
+          if(lastMilis%flickerTime>flickerTime/4){
+            screenUpdateLeft(chessClock.getLeftPlayerTime());
+            screenUpdateRight(chessClock.getRightPlayerTime());
+          }else{
+            screenUpdate(B0000000, B0000001, B0000000, B00000000, B0000000, B0000001, B0000000, B00000000);
+          }
+          screenUpdateLeft(chessClock.getLeftPlayerTime());
+          screenUpdateRight(chessClock.getRightPlayerTime());
         }
         if(millis()-lastMilis>showCounterTime){
           showCounterTime = 0;
@@ -1289,9 +1326,20 @@ void loop(){
           showCounterTime -= millis() - lastMilis;
         }      
       }else{
-        screenUpdateLeft(chessClock.getLeftPlayerTime());
-        screenUpdateRight(chessClock.getRightPlayerTime());
-      }
+        if (chessClock.getCurrentPlayer() == PLAYER_NONE && gameStarted){
+          if (lastMilis % flickerTime > flickerTime / 4){
+            screenUpdateLeft(chessClock.getLeftPlayerTime());
+            screenUpdateRight(chessClock.getRightPlayerTime());
+          }
+          else{
+            screenUpdate(B0000000, B0000001, B0000000, B00000000, B0000000, B0000001, B0000000, B00000000);
+          }
+        }else{
+          screenUpdateLeft(chessClock.getLeftPlayerTime());
+          screenUpdateRight(chessClock.getRightPlayerTime());
+        }
+
+        }
       if (chessClock.getGameResult() != PLAYER_NONE && isGameFinished == false){
         if(chessClock.getSoundIndicatorEnabled()) gameEnded();
         isGameFinished = true;
@@ -1627,7 +1675,89 @@ void loop(){
     }
 
     case SCREEN_MENU_PRESET_LOAD:{
-      screenUpdate(B00011100, B00111010, B11101110, B01111010, B00000000, digit[presetLoad/10+10], digit[presetLoad%10+10], B00000000);
+      if (lastMilis % flickerTime > flickerTime / 4){
+        switch(presetLoad){
+          case PRESET_1i0:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, B0000000, B01100001, B00000000, B11111100);
+            break;
+          }
+          case PRESET_1i1:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, B0000000, B01100001, B00000000, B01100001);
+            break;
+          }
+          case PRESET_2i0:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, B0000000, B11011011, B00000000, B11111100);
+            break;
+          }
+          case PRESET_2i1:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, B0000000, digit[2], B00000000, digit[1]);
+            break;
+          }
+          case PRESET_3i0:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, B0000000, digit[3], B00000000, digit[0]);
+            break;
+          }
+          case PRESET_3i2:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, B0000000, digit[3], B00000000, digit[2]);
+            break;
+          }
+          case PRESET_5i0:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, B0000000, digit[5], B00000000, digit[0]);
+            break;
+          }
+          case PRESET_5i5:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, B0000000, digit[5], B00000000, digit[5]);
+            break;  
+          }
+          case PRESET_10i0:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, digit[1], digit[0], B00000000, digit[0]);
+            break;
+          }
+          case PRESET_10i5:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, digit[1], digit[0], B00000000, digit[5]);
+            break;
+          }
+          case PRESET_15i0:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, digit[1], digit[5], B00000000, digit[0]);
+            break;
+          }
+          case PRESET_15i10:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, digit[1], digit[5], digit[1], digit[0]);
+            break;
+          }
+          case PRESET_20i0:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, digit[2], digit[0], B00000000, digit[0]);
+            break;
+          }
+          case PRESET_30i0:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, digit[3], digit[0], B00000000, digit[0]);
+            break;
+          }
+          case PRESET_45i45:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, digit[4], digit[5], digit[4], digit[5]);
+            break;
+          }
+          case PRESET_60i0:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, digit[6], digit[0], B00000000, digit[0]);
+            break;
+          }
+          case PRESET_90i0:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, digit[9], digit[0], B00000000, digit[0]);
+            break;
+          }
+          case PRESET_90c40a30i30:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, B10001110, B00011110, B00001010, B00101010);
+            break;
+          }
+          case PRESET_120c40a60c60a40i0:{
+            screenUpdate(B00011100, B00111010, B11101110, B01111010, B10001110, B00001100, B01111010, B10011110);
+            break;
+          }
+        }
+      }
+      else{
+        screenUpdate(B00011100, B00111010, B11101110, B01111010, digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY], digit[DIGIT_EMPTY]);
+      }
       break;
     }
 
