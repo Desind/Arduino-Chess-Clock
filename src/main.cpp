@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <ChessClock.h>
+#include <EEPROM.h>
 
 #define DIGIT_EMPTY 20
 #define CHAR_S 21
@@ -152,6 +153,7 @@ uint16_t flickerTime = 1000;
 int currentTimeChangeSegment = 0;
 uint16_t showCounterTime = 0;
 uint8_t presetLoad = 0;
+int8_t curPlayer = 0;
 
 byte currentScreen = 0;
 
@@ -195,7 +197,11 @@ void screenUpdateLeft(uint32_t time){
   digitalWrite(digit1, HIGH);
   digitalWrite(latch, HIGH);
   //DIGIT 2
-  shiftOut(data, clock, MSBFIRST, digit[C2]);
+  if(curPlayer==PLAYER_LEFT && (lastMilis % 1000 < 500) && !isGameFinished){
+    shiftOut(data, clock, MSBFIRST, digit[C2+10]);
+  }else{
+    shiftOut(data, clock, MSBFIRST, digit[C2]);
+  }
   digitalWrite(latch, LOW);
   digitalWrite(digit2, LOW);
   delay(digitDelay);
@@ -242,7 +248,11 @@ void screenUpdateRight(uint32_t time){
   digitalWrite(digit5, HIGH);
   digitalWrite(latch, HIGH);
   //DIGIT 6
-  shiftOut(data, clock, MSBFIRST, digit[C6]);
+  if(curPlayer==PLAYER_RIGHT && (lastMilis % 1000 < 500) && !isGameFinished){
+    shiftOut(data, clock, MSBFIRST, digit[C6+10]);
+  }else{
+    shiftOut(data, clock, MSBFIRST, digit[C6]);
+  }
   digitalWrite(latch, LOW);
   digitalWrite(digit6, LOW);
   delay(digitDelay);
@@ -459,22 +469,25 @@ void setup(){
   digitalWrite(resetPin, HIGH);
   pinMode(resetPin, OUTPUT);
   lastMilis = millis();
-
-  chessClock.setLeftPlayerTime(300000);
-  chessClock.setRightPlayerTime(300000);
-  chessClock.setClockMode(MODE_SUDDEN_DEATH);
-  chessClock.setIncrementValue(5);
-  chessClock.setDelayValue(3);
-  chessClock.setBronsteinValue(5);
-  chessClock.setTournamentMoveCap(10);
-  chessClock.setTournamentPreCapIncrement(5);
-  chessClock.setTournamentPostCapIncrement(10);
-  chessClock.setTournamentAdditionalTimeAfterCap(120000);
-  chessClock.setTournamentMoveCap2(20);
-  chessClock.setTournamentPostCap2Increment(20);
-  chessClock.setTournamentAdditionalTimeAfterCap2(180000);
-  chessClock.switchMoveCounter(true);
-  chessClock.switchSoundIndicator(true);
+  if(EEPROM.read(0)==255){
+    chessClock.loadFromEEPROM(0);
+  }else{
+    chessClock.setLeftPlayerTime(300000);
+    chessClock.setRightPlayerTime(300000);
+    chessClock.setClockMode(MODE_SUDDEN_DEATH);
+    chessClock.setIncrementValue(0);
+    chessClock.setDelayValue(0);
+    chessClock.setBronsteinValue(0);
+    chessClock.setTournamentMoveCap(0);
+    chessClock.setTournamentPreCapIncrement(0);
+    chessClock.setTournamentPostCapIncrement(0);
+    chessClock.setTournamentAdditionalTimeAfterCap(0);
+    chessClock.setTournamentMoveCap2(0);
+    chessClock.setTournamentPostCap2Increment(0);
+    chessClock.setTournamentAdditionalTimeAfterCap2(0);
+    chessClock.switchMoveCounter(true);
+    chessClock.switchSoundIndicator(true);
+  }
   setupAnimation();
 }
 
@@ -504,7 +517,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_MODE:{
-        currentScreen = SCREEN_MENU_USER_PRESET;
+        currentScreen = SCREEN_MENU_PRESET;
         break;
       }
       case SCREEN_MENU_MODE_CHANGE:{
@@ -719,7 +732,7 @@ void loop(){
         }
         break;
       }
-      case SCREEN_MENU_USER_PRESET:{
+      /*case SCREEN_MENU_USER_PRESET:{
         currentScreen = SCREEN_MENU_PRESET;
         break;
       }
@@ -737,7 +750,7 @@ void loop(){
       case SCREEN_MENU_USER_PRESET_SAVE_PICK:{
 
         break;
-      }
+      }*/
     }
       leftPressed = true;
   }else if(leftButtonState<100){
@@ -841,7 +854,8 @@ void loop(){
         break;
       }
       case SCREEN_MENU_INCREMENT_CHANGE:{
-        chessClock.setIncrementValue(chessClock.getIncrementValue()/1000 + 1);
+        if (chessClock.getIncrementValue()<180000) 
+          chessClock.setIncrementValue(chessClock.getIncrementValue() / 1000 + 1);
         break;
       }
       case SCREEN_MENU_DELAY:{
@@ -849,7 +863,8 @@ void loop(){
         break;
       }
       case SCREEN_MENU_DELAY_CHANGE:{
-        chessClock.setDelayValue(chessClock.getDelayValue() / 1000 + 1);
+        if (chessClock.getDelayValue() < 180000)
+          chessClock.setDelayValue(chessClock.getDelayValue() / 1000 + 1);
         break;
       }
       case SCREEN_MENU_BRONSTEIN:{
@@ -857,7 +872,8 @@ void loop(){
         break;
       }
       case SCREEN_MENU_BRONSTEIN_CHANGE:{
-        chessClock.setBronsteinValue(chessClock.getBronsteinValue() / 1000 + 1);
+        if (chessClock.getBronsteinValue() < 180000)
+          chessClock.setBronsteinValue(chessClock.getBronsteinValue() / 1000 + 1);
         break;
       }
       case SCREEN_MENU_TOURNAMENT_INCA:{
@@ -865,7 +881,8 @@ void loop(){
         break;
       }
       case SCREEN_MENU_TOURNAMENT_INCA_CHANGE:{
-        chessClock.setTournamentPreCapIncrement(chessClock.getTournamentPreCapIncrement()/1000+1);
+        if (chessClock.getTournamentPreCapIncrement()<180000)
+          chessClock.setTournamentPreCapIncrement(chessClock.getTournamentPreCapIncrement() / 1000 + 1);
         break;
       }
       case SCREEN_MENU_TOURNAMENT_CAP:{
@@ -873,9 +890,12 @@ void loop(){
         break;
       }
       case SCREEN_MENU_TOURNAMENT_CAP_CHANGE:{
-        chessClock.setTournamentMoveCap(chessClock.getTournamentMoveCap() + 1);
-        if (chessClock.getTournamentMoveCap() > chessClock.getTournamentMoveCap2()){
-          chessClock.setTournamentMoveCap2(chessClock.getTournamentMoveCap());
+        if(chessClock.getTournamentMoveCap()<255){
+          chessClock.setTournamentMoveCap(chessClock.getTournamentMoveCap() + 1);
+          if (chessClock.getTournamentMoveCap() > chessClock.getTournamentMoveCap2())
+          {
+            chessClock.setTournamentMoveCap2(chessClock.getTournamentMoveCap());
+          }
         }
         break;
       }
@@ -892,7 +912,8 @@ void loop(){
         break;
       }
       case SCREEN_MENU_TOURNAMENT_INCB_CHANGE:{
-        chessClock.setTournamentPostCapIncrement(chessClock.getTournamentPostCapIncrement() / 1000 + 1);
+        if (chessClock.getTournamentPostCapIncrement() < 180000)
+          chessClock.setTournamentPostCapIncrement(chessClock.getTournamentPostCapIncrement() / 1000 + 1);
         break;
       }
       case SCREEN_MENU_TOURNAMENT_CAP2:{
@@ -900,7 +921,8 @@ void loop(){
         break;
       }
       case SCREEN_MENU_TOURNAMENT_CAP2_CHANGE:{
-        chessClock.setTournamentMoveCap2(chessClock.getTournamentMoveCap2() + 1);
+        if(chessClock.getTournamentMoveCap2()<255)
+          chessClock.setTournamentMoveCap2(chessClock.getTournamentMoveCap2() + 1);
         break;
       }
       case SCREEN_MENU_TOURNAMENT_ADD_TIME2:{
@@ -916,7 +938,8 @@ void loop(){
         break;
       }
       case SCREEN_MENU_TOURNAMENT_INCC_CHANGE:{
-        chessClock.setTournamentPostCap2Increment(chessClock.getTournamentPostCap2Increment() / 1000 + 1);
+        if (chessClock.getTournamentPostCap2Increment() < 180000)
+          chessClock.setTournamentPostCap2Increment(chessClock.getTournamentPostCap2Increment() / 1000 + 1);
         break;
       }
       case SCREEN_MENU_MOVES:{
@@ -936,7 +959,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_PRESET:{
-        currentScreen = SCREEN_MENU_USER_PRESET;
+        currentScreen = SCREEN_MENU_MODE;
         break;
       }
       case SCREEN_MENU_PRESET_LOAD:{
@@ -947,7 +970,7 @@ void loop(){
         }
         break;
       }
-      case SCREEN_MENU_USER_PRESET:{
+      /*case SCREEN_MENU_USER_PRESET:{
         currentScreen = SCREEN_MENU_MODE;
         break;
       }
@@ -966,7 +989,7 @@ void loop(){
       case SCREEN_MENU_USER_PRESET_SAVE_PICK:{
 
         break;
-      }
+      }*/
     }
 
 
@@ -992,6 +1015,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_MODE:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1000,6 +1024,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_TIME:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1009,6 +1034,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_INCREMENT:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1017,6 +1043,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_DELAY:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1025,6 +1052,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_BRONSTEIN:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1033,6 +1061,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_TOURNAMENT_INCA:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1041,6 +1070,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_TOURNAMENT_CAP:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1049,6 +1079,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_TOURNAMENT_ADD_TIME:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1057,6 +1088,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_TOURNAMENT_INCB:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1065,6 +1097,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_TOURNAMENT_CAP2:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1073,6 +1106,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_TOURNAMENT_ADD_TIME2:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1081,6 +1115,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_TOURNAMENT_INCC:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1089,6 +1124,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_MOVES:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1097,6 +1133,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_SOUND:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1105,6 +1142,7 @@ void loop(){
         break;
       }
       case SCREEN_MENU_PRESET:{
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1112,7 +1150,7 @@ void loop(){
         currentScreen = SCREEN_MENU_PRESET;
         break;
       }
-      case SCREEN_MENU_USER_PRESET:{
+      /*case SCREEN_MENU_USER_PRESET:{
         currentScreen = SCREEN_GAME;
         break;
       }
@@ -1131,7 +1169,7 @@ void loop(){
       case SCREEN_MENU_USER_PRESET_SAVE_PICK:{
         currentScreen = SCREEN_MENU_USER_PRESET_SAVE;
         break;
-      }
+      }*/
     }
 
     backPressed = true;
@@ -1271,9 +1309,10 @@ void loop(){
       }
       case SCREEN_MENU_PRESET_LOAD:{
         chessClock.loadPreset(presetLoad);
+        currentScreen = SCREEN_GAME;
         break;
       }
-      case SCREEN_MENU_USER_PRESET:{
+      /*case SCREEN_MENU_USER_PRESET:{
         currentScreen = SCREEN_MENU_USER_PRESET_LOAD;
         break;
       }
@@ -1292,7 +1331,7 @@ void loop(){
       case SCREEN_MENU_USER_PRESET_SAVE_PICK:{
 
         break;
-      }
+      }*/
     }
     menuPressed = true;
   }else if(menuButtonState<100){
@@ -1311,11 +1350,11 @@ void loop(){
           screenMovesLeft(chessClock.getLeftPlayerMoves());
           screenUpdateRight(chessClock.getRightPlayerTime());
         }else if(chessClock.getCurrentPlayer() == PLAYER_NONE){
-          if(lastMilis%flickerTime>flickerTime/4){
+          if(lastMilis%flickerTime>flickerTime/3){
             screenUpdateLeft(chessClock.getLeftPlayerTime());
             screenUpdateRight(chessClock.getRightPlayerTime());
           }else{
-            screenUpdate(B0000000, B0000001, B0000000, B00000000, B0000000, B0000001, B0000000, B00000000);
+            screenUpdate(B0000000, B00000001, B0000000, B00000000, B0000000, B00000001, B0000000, B00000000);
           }
           screenUpdateLeft(chessClock.getLeftPlayerTime());
           screenUpdateRight(chessClock.getRightPlayerTime());
@@ -1327,12 +1366,12 @@ void loop(){
         }      
       }else{
         if (chessClock.getCurrentPlayer() == PLAYER_NONE && gameStarted){
-          if (lastMilis % flickerTime > flickerTime / 4){
+          if (lastMilis % flickerTime > flickerTime / 3){
             screenUpdateLeft(chessClock.getLeftPlayerTime());
             screenUpdateRight(chessClock.getRightPlayerTime());
           }
           else{
-            screenUpdate(B0000000, B0000001, B0000000, B00000000, B0000000, B0000001, B0000000, B00000000);
+            screenUpdate(B0000000, B00000001, B0000000, B00000000, B0000000, B00000001, B0000000, B00000000);
           }
         }else{
           screenUpdateLeft(chessClock.getLeftPlayerTime());
@@ -1761,7 +1800,7 @@ void loop(){
       break;
     }
 
-    case SCREEN_MENU_USER_PRESET:{
+    /*case SCREEN_MENU_USER_PRESET:{
       screenUpdate(B01111100, B10110110, B00001010, B00000000, B11001110, B00001010, B00011110, B00000000);
       break;
     }
@@ -1794,9 +1833,9 @@ void loop(){
     case SCREEN_MENU_USER_PRESET_SAVE_PICK:{
       screenUpdate(B00000000, B00000000, B00000000, B0000000, B10110110, B11101110, B01111100, B10011110);
       break;
-    }
+    }*/
   }
-
+  curPlayer = chessClock.getCurrentPlayer();
   lastMilis = millis();
   digitalWrite(rightLED, LOW);
   digitalWrite(leftLED, LOW);

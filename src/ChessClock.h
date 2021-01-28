@@ -85,6 +85,9 @@ class ChessClock
 
         void loadPreset(byte preset);   //LOAD CHESS CLOCK PRESET FROM MEMORY
 
+        void saveToEEPROM(uint8_t slot);
+        void loadFromEEPROM(uint8_t slot);
+
         uint32_t getLeftPlayerTime();
         uint32_t getRightPlayerTime();
         uint32_t getLeftPlayerMoves();
