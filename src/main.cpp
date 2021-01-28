@@ -1016,6 +1016,8 @@ void loop(){
     rightPressed = true;
   }else if(rightButtonState<100){
     rightPressed = false;
+    rightAutoRepeatTime = AUTO_REPEAT_TIME;
+    rightAutoRepeatDelay = AUTO_REPEAT_DELAY;
   }
   if(rightButtonState > 800 && currentScreen != SCREEN_GAME){
     if(rightAutoRepeatDelay<0){
