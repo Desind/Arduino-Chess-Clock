@@ -50,6 +50,8 @@
 
 
 #define MOVE_COUNTER_SHOW_TIME 2000
+#define AUTO_REPEAT_DELAY 120
+#define AUTO_REPEAT_TIME 10
 
 const byte digit[28] = {
     B11111101, //0.
@@ -154,6 +156,10 @@ int currentTimeChangeSegment = 0;
 uint16_t showCounterTime = 0;
 uint8_t presetLoad = 0;
 int8_t curPlayer = 0;
+int leftAutoRepeatDelay = AUTO_REPEAT_DELAY;
+int leftAutoRepeatTime = AUTO_REPEAT_TIME;
+int rightAutoRepeatDelay = AUTO_REPEAT_DELAY;
+int rightAutoRepeatTime = AUTO_REPEAT_TIME;
 
 byte currentScreen = 0;
 
@@ -752,9 +758,23 @@ void loop(){
         break;
       }*/
     }
-      leftPressed = true;
+      
+    leftPressed = true;
   }else if(leftButtonState<100){
     leftPressed = false;
+    leftAutoRepeatTime = AUTO_REPEAT_TIME;
+    leftAutoRepeatDelay = AUTO_REPEAT_DELAY;
+  }
+  if(leftButtonState > 800 && currentScreen != SCREEN_GAME){
+    if(leftAutoRepeatDelay<0){
+      leftAutoRepeatTime--;
+      if (leftAutoRepeatTime < 0){
+        leftAutoRepeatTime = AUTO_REPEAT_TIME;
+        leftPressed = false;
+      }
+    }else{
+      leftAutoRepeatDelay--;
+    }
   }
   //RIGHT BUTTON PRESS
   if(rightButtonState > 800 && !rightPressed){
@@ -997,6 +1017,17 @@ void loop(){
   }else if(rightButtonState<100){
     rightPressed = false;
   }
+  if(rightButtonState > 800 && currentScreen != SCREEN_GAME){
+    if(rightAutoRepeatDelay<0){
+      rightAutoRepeatTime--;
+      if (rightAutoRepeatTime < 0){
+        rightAutoRepeatTime = AUTO_REPEAT_TIME;
+        rightPressed = false;
+      }
+    }else{
+      rightAutoRepeatDelay--;
+    }
+  }
   //BACK BUTTON PRESS
   if(backButtonState > 800 && !backPressed){
     if(chessClock.getSoundIndicatorEnabled()) tone(buzzerPin, 330, 50);
@@ -1184,7 +1215,9 @@ void loop(){
         if(!gameStarted){
           currentScreen = SCREEN_MENU_MODE;
         }else{
-          digitalWrite(resetPin,LOW);
+          if(isGameFinished || chessClock.getCurrentPlayer() == PLAYER_NONE){
+            digitalWrite(resetPin, LOW);
+          }
         }
         break;
       }
@@ -1309,6 +1342,7 @@ void loop(){
       }
       case SCREEN_MENU_PRESET_LOAD:{
         chessClock.loadPreset(presetLoad);
+        chessClock.saveToEEPROM(0);
         currentScreen = SCREEN_GAME;
         break;
       }

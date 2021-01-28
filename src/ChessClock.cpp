@@ -601,7 +601,7 @@ void ChessClock::saveToEEPROM(uint8_t slot){
         EEPROM.write((18 + slot * 20), countOn);
 
 
-    if (!EEPROM.read(0) && slot == 0)
+    if (EEPROM.read(0) == 0 && slot == 0)
         EEPROM.write(0,255);
     
 };
