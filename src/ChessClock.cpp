@@ -7,6 +7,12 @@ void ChessClock::setLeftPlayerTime(uint32_t time){
 void ChessClock::setRightPlayerTime(uint32_t time){
     rightPlayerTime = time;
 };
+void ChessClock::setLeftPlayerMoves(uint32_t moves){
+    leftPlayerMoves = moves;
+};
+void ChessClock::setRightPlayerMoves(uint32_t moves){
+    rightPlayerMoves = moves;
+};
 void ChessClock::setClockMode(byte mode){
     clockMode = mode;
 };
@@ -77,6 +83,10 @@ uint32_t ChessClock::getIncrementValue(){
 };
 uint32_t ChessClock::getDelayValue(){
     return delayValue;
+};
+uint32_t ChessClock::getDelayLeft()
+{
+    return delayLeft;
 };
 uint32_t ChessClock::getBronsteinValue(){
     return bronsteinValue;
@@ -534,6 +544,7 @@ ChessClock::ChessClock(){
     gameResult = PLAYER_NONE;
     leftPlayerMoves = 0;
     rightPlayerMoves = 0;
+    delayLeft = delayValue;
 }
 
 
@@ -562,6 +573,9 @@ void ChessClock::saveToEEPROM(uint8_t slot){
     //OPTIONS
     uint8_t soundOn = (uint8_t) soundIndicatorEnabled;
     uint8_t countOn = (uint8_t) moveCounterEnabled;
+
+    //CHESS CLOCK MODE
+    uint8_t mode = (uint8_t) clockMode;
 
     if (EEPROM.read(1 + slot * 20) != leftHours)
         EEPROM.write((1 + slot * 20), leftHours);
@@ -599,7 +613,8 @@ void ChessClock::saveToEEPROM(uint8_t slot){
         EEPROM.write((17 + slot * 20), soundOn);
     if (EEPROM.read(18 + slot * 20) != countOn)
         EEPROM.write((18 + slot * 20), countOn);
-
+    if (EEPROM.read(19 + slot * 20) != mode)
+        EEPROM.write((19 + slot * 20), mode);
 
     if (EEPROM.read(0) == 0 && slot == 0)
         EEPROM.write(0,255);
@@ -624,4 +639,5 @@ void ChessClock::loadFromEEPROM(uint8_t slot){
     tournamentPostCap2Increment = EEPROM.read(16 + slot * 20) * 1000;
     soundIndicatorEnabled = EEPROM.read(17 + slot * 20);
     moveCounterEnabled = EEPROM.read(18 + slot * 20);
+    clockMode = EEPROM.read(19 + slot * 20);
 };

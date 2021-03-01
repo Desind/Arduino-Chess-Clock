@@ -549,7 +549,9 @@ void loop(){
           showCounterTime = MOVE_COUNTER_SHOW_TIME;
         }
         if(!gameStarted){
+          uint32_t tmptime = chessClock.getLeftPlayerTime();
           chessClock.playerMove(PLAYER_LEFT);
+          chessClock.setLeftPlayerTime(tmptime);
           chessClock.setLeftPlayerMoves(0);
           showCounterTime = 0;
         }
@@ -884,8 +886,10 @@ void loop(){
           showCounterTime = MOVE_COUNTER_SHOW_TIME;
         }
         if (!gameStarted){
+          uint32_t tmptime = chessClock.getRightPlayerTime();
           chessClock.playerMove(PLAYER_RIGHT);
           chessClock.setRightPlayerMoves(0);
+          chessClock.setRightPlayerTime(tmptime);
           showCounterTime = 0;
         }
         if(gameStarted && chessClock.getCurrentPlayer() == PLAYER_NONE){

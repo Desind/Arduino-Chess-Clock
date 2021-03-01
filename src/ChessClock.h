@@ -65,6 +65,8 @@ class ChessClock
 
         void setLeftPlayerTime(uint32_t time);
         void setRightPlayerTime(uint32_t time);
+        void setLeftPlayerMoves(uint32_t moves);
+        void setRightPlayerMoves(uint32_t moves);
         void setClockMode(byte clockMode);
         void setIncrementValue(uint32_t value);
         void setDelayValue(uint32_t value);
@@ -97,6 +99,7 @@ class ChessClock
         byte getClockMode();
         uint32_t getIncrementValue();
         uint32_t getDelayValue();
+        uint32_t getDelayLeft();
         uint32_t getBronsteinValue();
         uint32_t getTournamentMoveCap();          
         uint32_t getTournamentPreCapIncrement();       
